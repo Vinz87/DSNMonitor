@@ -1,0 +1,5 @@
+old*
+config.py
+*.json
+dashboard/google_analytics.php
+.DS_Store
