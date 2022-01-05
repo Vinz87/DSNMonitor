@@ -43,9 +43,9 @@
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		<script type="text/javascript">
 			google.charts.load("current", {"packages":["timeline", "line", "scatter"]});
-			google.charts.setOnLoadCallback(drawChart);
+			google.charts.setOnLoadCallback(initCharts);
 			
-			function drawChart() {
+			function initCharts() {
 				// Timeline Charts
 				var stationTimelineDataJSON = $.ajax({
 					url: "stationTimelineData.json",
@@ -54,7 +54,7 @@
 					async: false,
 					timeout: 0
 					}).responseText;
-				var stationTimelineDataTable = new google.visualization.DataTable(stationTimelineDataJSON);
+				stationTimelineDataTable = new google.visualization.DataTable(stationTimelineDataJSON);
 				var stationTimelineOptions = {
 					title: "DSN Monitor",
 					hAxis: {
@@ -63,7 +63,7 @@
 					height: 500
 				};
 				var stationTimelineContainer = document.getElementById("stationTimeline");
-				var stationTimelineChart = new google.visualization.Timeline(stationTimelineContainer);
+				stationTimelineChart = new google.visualization.Timeline(stationTimelineContainer);
 				stationTimelineChart.draw(stationTimelineDataTable, stationTimelineOptions);
 				
 				var spacecraftTimelineDataJSON = $.ajax({
@@ -72,124 +72,24 @@
 					cache: false,
 					async: false,
 					timeout: 0
-					}).responseText;
-				var spacecraftTimelineDataTable = new google.visualization.DataTable(spacecraftTimelineDataJSON);
+				}).responseText;
+				spacecraftTimelineDataTable = new google.visualization.DataTable(spacecraftTimelineDataJSON);
 				var spacecraftTimelineOptions = {
 					title: "DSN Monitor",
 					hAxis: {
-					format: "MMM dd, H:00"
+						format: "MMM dd, H:00"
 					},
 					height: 500,
 					timeline: { colorByRowLabel: true }
 				};
 				var spacecraftTimelineContainer = document.getElementById("spacecraftTimeline");
-				var spacecraftTimelineChart = new google.visualization.Timeline(spacecraftTimelineContainer);
+				spacecraftTimelineChart = new google.visualization.Timeline(spacecraftTimelineContainer);
 				spacecraftTimelineChart.draw(spacecraftTimelineDataTable, spacecraftTimelineOptions);
 				
 				
 				// Timeline select event
 				google.visualization.events.addListener(stationTimelineChart, "select", stationTimelineSelectHandler);
 				google.visualization.events.addListener(spacecraftTimelineChart, "select", spacecraftTimelineSelectHandler);
-				
-				function stationTimelineSelectHandler() {
-					dataTable = stationTimelineDataTable;
-					selection = stationTimelineChart.getSelection();
-					antenna = dataTable.getValue(selection[0].row, 0);
-					spacecraft_name = dataTable.getValue(selection[0].row, 1);
-					start = dataTable.getValue(selection[0].row, 2);
-					end = dataTable.getValue(selection[0].row, 3);
-					getLinkData(antenna, spacecraft_name, start, end);
-				}
-				
-				function spacecraftTimelineSelectHandler() {
-					dataTable = spacecraftTimelineDataTable;
-					selection = spacecraftTimelineChart.getSelection();
-					spacecraft_name = dataTable.getValue(selection[0].row, 0);
-					antenna = dataTable.getValue(selection[0].row, 1);
-					start = dataTable.getValue(selection[0].row, 2);
-					end = dataTable.getValue(selection[0].row, 3);
-					getLinkData(antenna, spacecraft_name, start, end);
-				}
-				
-				function getLinkData(antenna, spacecraft_name, start, end) {
-					var linkCurrentData = $.ajax({
-						url: "get_link_current_data.php?debug=0&antenna="+antenna+"&spacecraft_name="+spacecraft_name+"&start="+start+"&end="+end,
-						dataType: "text",
-						cache: false,
-						async: false,
-						timeout: 0
-						}).responseText;
-					$("#link_current_data").html("").html(linkCurrentData);
-					
-					var linkHistoryData_range = $.ajax({
-						url: "get_link_history_data.php?debug=0&spacecraft_name="+spacecraft_name+"&field=spacecraft_range",
-						dataType: "txt",
-						cache: false,
-						async: false,
-						timeout: 0
-					}).responseText;
-					var linkHistoryData_datarate = $.ajax({
-						url: "get_link_history_data.php?debug=0&spacecraft_name="+spacecraft_name+"&field=data_rate",
-						dataType: "txt",
-						cache: false,
-						async: false,
-						timeout: 0
-					}).responseText;
-					var linkHistoryData_power = $.ajax({
-						url: "get_link_history_data.php?debug=0&spacecraft_name="+spacecraft_name+"&field=power",
-						dataType: "txt",
-						cache: false,
-						async: false,
-						timeout: 0
-					}).responseText;
-					
-					var chartConfig = {
-						type: "line",
-					    data: { labels: [],
-						    datasets: [{
-							    label: "range",
-							    borderColor: "#ff8047",
-							    borderWidth: 1,
-							    lineTension: 0,
-							    fill: false,
-							    pointRadius: 5, 
-							    pointBackgroundColor: "#ffffff",
-							    pointBorderWidth: 2,
-							    spanGaps: false,
-							    yAxisID: "A",
-								data: JSON.parse(linkHistoryData_range)
-							},
-							{
-							    label: "data rate",
-							    borderColor: "#4773ff",
-							    borderWidth: 1,
-							    lineTension: 0,
-							    fill: false,
-							    pointRadius: 5, 
-							    pointBackgroundColor: "#ffffff",
-							    pointBorderWidth: 2,
-							    spanGaps: false,
-							    yAxisID: "B",
-								data: JSON.parse(linkHistoryData_datarate)
-							},
-							{
-							    label: "power",
-							    borderColor: "#00a100",
-							    borderWidth: 1,
-							    lineTension: 0,
-							    fill: false,
-							    pointRadius: 5, 
-							    pointBackgroundColor: "#ffffff",
-							    pointBorderWidth: 2,
-							    spanGaps: false,
-							    yAxisID: "C",
-								data: JSON.parse(linkHistoryData_power)
-							}] 
-						}
-					};
-					link_history_data_chart.config = chartConfig;
-					link_history_data_chart.update();
-				}
 				
 				
 				// Scatter Charts
@@ -242,6 +142,113 @@
 				rangeChartSolarSystem.draw(rangeDataSolarSystem, google.charts.Scatter.convertOptions(rangeChartSolarSystemOptions));
 				var rangeChartBeyond = new google.charts.Scatter(document.getElementById("range_chart_beyond"));
 				rangeChartBeyond.draw(rangeDataBeyond, google.charts.Scatter.convertOptions(rangeChartBeyondOptions));
+			}
+			
+			function stationTimelineSelectHandler() {
+				dataTable = stationTimelineDataTable;
+				selection = stationTimelineChart.getSelection();
+				antenna = dataTable.getValue(selection[0].row, 0);
+				spacecraft_name = dataTable.getValue(selection[0].row, 1);
+				start = dataTable.getValue(selection[0].row, 2);
+				end = dataTable.getValue(selection[0].row, 3);
+				getLinkData($("label.btn.active input").val());
+			}
+			
+			function spacecraftTimelineSelectHandler() {
+				dataTable = spacecraftTimelineDataTable;
+				selection = spacecraftTimelineChart.getSelection();
+				spacecraft_name = dataTable.getValue(selection[0].row, 0);
+				antenna = dataTable.getValue(selection[0].row, 1);
+				start = dataTable.getValue(selection[0].row, 2);
+				end = dataTable.getValue(selection[0].row, 3);
+				getLinkData($("label.btn.active input").val());
+			}
+			
+			function getLinkData(timerange) {
+				var linkCurrentData = $.ajax({
+					url: "get_link_current_data.php?debug=0&antenna="+antenna+"&spacecraft_name="+spacecraft_name+"&start="+start+"&end="+end,
+					dataType: "text",
+					cache: false,
+					async: false,
+					timeout: 0
+					}).responseText;
+				if (typeof antenna !== 'undefined') {
+					$("#link_current_data").html("").html(linkCurrentData);	
+				}
+				
+				var linkHistoryData_range = $.ajax({
+					url: "get_link_history_data.php?debug=0&antenna="+antenna+"&spacecraft_name="+spacecraft_name+"&field=spacecraft_range&spacecraft_name="+spacecraft_name+"&start="+start+"&end="+end+"&timerange="+timerange,
+					dataType: "txt",
+					cache: false,
+					async: false,
+					timeout: 0
+				}).responseText;
+				var linkHistoryData_datarate = $.ajax({
+					url: "get_link_history_data.php?debug=0&antenna="+antenna+"&spacecraft_name="+spacecraft_name+"&field=data_rate&spacecraft_name="+spacecraft_name+"&start="+start+"&end="+end+"&timerange="+timerange,
+					dataType: "txt",
+					cache: false,
+					async: false,
+					timeout: 0
+				}).responseText;
+				var linkHistoryData_power = $.ajax({
+					url: "get_link_history_data.php?debug=0&antenna="+antenna+"&spacecraft_name="+spacecraft_name+"&field=power&spacecraft_name="+spacecraft_name+"&start="+start+"&end="+end+"&timerange="+timerange,
+					dataType: "txt",
+					cache: false,
+					async: false,
+					timeout: 0
+				}).responseText;
+				
+				var chartConfig = {
+					type: "line",
+				    data: { labels: [],
+					    datasets: [{
+						    label: "range",
+						    borderColor: "#ff8047",
+						    borderWidth: 1,
+						    lineTension: 0,
+						    fill: false,
+						    pointRadius: 5, 
+						    pointBackgroundColor: "#ffffff",
+						    pointBorderWidth: 2,
+						    spanGaps: false,
+						    yAxisID: "A",
+							data: JSON.parse(linkHistoryData_range)
+						},
+						{
+						    label: "data rate",
+						    borderColor: "#4773ff",
+						    borderWidth: 1,
+						    lineTension: 0,
+						    fill: false,
+						    pointRadius: 5, 
+						    pointBackgroundColor: "#ffffff",
+						    pointBorderWidth: 2,
+						    spanGaps: false,
+						    yAxisID: "B",
+							data: JSON.parse(linkHistoryData_datarate)
+						},
+						{
+						    label: "power",
+						    borderColor: "#00a100",
+						    borderWidth: 1,
+						    lineTension: 0,
+						    fill: false,
+						    pointRadius: 5, 
+						    pointBackgroundColor: "#ffffff",
+						    pointBorderWidth: 2,
+						    spanGaps: false,
+						    yAxisID: "C",
+							data: JSON.parse(linkHistoryData_power)
+						}] 
+					}
+				};
+				linkHistoryDataChart.config = chartConfig;
+				if (timerange == "alltime" || timerange == "last3days") {
+					linkHistoryDataChart.options.scales.xAxes[0].time.unit = "day";
+				} else if (timerange == "timeslot") {
+					linkHistoryDataChart.options.scales.xAxes[0].time.unit = "minute";
+				}
+				linkHistoryDataChart.update();
 			}
 		</script>
 		<style>
@@ -401,10 +408,21 @@
 		                                        </table>
 		                                    </div>
 		                                    <div class="col-md-9 col-sm-12 col-xs-12" id="link_history_data">
+			                                    <div class="btn-group btn-group-sm form-check" data-toggle="buttons" id="btngroup">
+													<label class="btn btn-secondary active" onclick="getLinkData('alltime')">
+														<input type="radio" class="join-btn" name="history-options" value="alltime"> All-time
+													</label>
+													<label class="btn btn-secondary" onclick="getLinkData('last3days')">
+														<input type="radio" class="join-btn" name="history-options" value="last3days"> Last 3 days
+													</label>
+													<label class="btn btn-secondary" onclick="getLinkData('timeslot')">
+														<input type="radio" class="join-btn" name="history-options" value="timeslot"> Selected Timeslot
+													</label>
+												</div>
 			                                    <canvas id="link_history_data_canvas"></canvas>
 			                                    <script>
 	                                    			var context = document.getElementById("link_history_data_canvas").getContext("2d");
-													var link_history_data_chart = new Chart(context, {
+													var linkHistoryDataChart = new Chart(context, {
 													    type: "line",
 													    data: { datasets: [{
 																    label: "",
@@ -445,7 +463,6 @@
 													        maintainAspectRatio: true
 													    }
 													});
-													console.log(link_history_data_chart)
 			                                    </script>
 		                                    </div>
 										</div>

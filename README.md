@@ -13,7 +13,7 @@ Python scripts are used to:
 * store them in a MySQL database  
 * generate JSON data as input for the graphs  
 
-Graphic visualization of data is provided through [Google Charts](https://developers.google.com/chart) library, which are placed together in a [Bootstrap](https://getbootstrap.com) webpage.  
+Graphic visualization of data is provided through [Google Charts](https://developers.google.com/chart) library, and the graphs are placed together in a [Bootstrap](https://getbootstrap.com) webpage.  
 
 The entire project (Python scripts through cronjobs, data visualization and website front-end hosting) runs 24/7 on a Raspberry Pi Zero.  
 
@@ -45,7 +45,7 @@ See the example below, where it's interesting to note the 24/7 coverage reserved
 Time slots in timelines visualizations are hyperlink which, when selected, show additional information of that particular link in the lower half of the page.  
 Together with information about the selected slot in particular, a historical view of characteristics such as range from Earth, data rate and received power is shown for the selected spacecraft.  
 
-![](https://i.imgur.com/8R1lrzf.png)
+![](https://i.imgur.com/AjjJUGT.png)
 
 #### Spacecraft Range  
 
@@ -74,7 +74,7 @@ Three plots are generated with different scales, in order to be clearly visible:
 
 ### Setup
 
-* Install a MySQL database, and upload the sample SQL dump provided in this repository
+* Install a MySQL database, and import the sample SQL dump provided in this repository
 * Install the Gentelella Bootstrap template (in my case it is hosted at a separate path in the Raspberry Pi, and it's accessible online)
 * Update the `config.py` file with your database login information and the URL pointing at your Bootstrap installation
 
